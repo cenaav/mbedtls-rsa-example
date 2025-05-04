@@ -8,8 +8,48 @@
 #include <mbedtls/base64.h>
 #include <mbedtls/sha256.h>
 
-// JSON data to process
-static const char *json_data = "{\"en\":0,\"fb\":\"F1\",\"fa\":1,\"fl\":1,\"fv\":1,\"temp_home\":22.2,\"temp_refrigerator\":23.3,\"humidity\":24.4,\"fault_power\":\"k\",\"hw\":\"G\"}";
+// ***************************************************** RSA KEYS ***********************************************************
+
+const char *private_key_pem = R"(-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC2h20oITt/Qgew
+EaRj8iEguxYxCBiws1BXhH28YwfRn7ihNA9NMKlDcWrJVLQlo0qrVs9te/0a4/R/
+MsZLPFTyLxKphWfJ+CBujMnn/AdM3gFiSRyJUJ0PokAU/kgnhx9w0N5p/T7L3hfM
+1GWszEkT4i9Ys8cf4uIcm7MFIINmzDwPUVoOJF+JYJGU22L+ynxk8mAdiVxgmHpA
+u8vnWOdlrX6O1CRc+mYVUaA1KRTEsjanG4JNr9tM55SdQGFhM5jZvaTsMlxy08NC
+9OGHhKg1LEbu6bVSx6UdkcZ+q5qMJtp6mU7y8eSuQVjDSKrwK56MmI91fkeuatZL
+g1q9gIBzAgMBAAECggEADzmTms3O0yoUTxTho+6N4deJHdThjleeo3YrMLwH6m3K
+rjOT9SnSbIw4zotQrXUF5O3MRoMZlRUfjz6SeLMTGNJhWZ+FjTyzo9T9gGquxzQb
+ZHHZvgBp4WR0uOuO5DEqp7PcYXXct4+SZ6TtyDCQBecPcPQp71hy6NT55TsViszp
+Q3V8yafruN+0nlbpOSKJDkFzThXrE3UmP9Zmk+4tOjxlTp4kVg4BaLSda2BXNdNh
+Pu5Q2mWinMRmBqR7a63VU2k7W9+a7twVQfPhZF3LgLItuAlxAfQZCYJ2TqCdTmQP
+3EGBCSYt37bi2SBHeQmTkC8mmb+zBhRqKcZ2MXflAQKBgQDaCDk5pU1X2hqfnYmA
+PZqhx+VRVF5TP6JbpNlreiNkhQDq85ZDKcKey8XemhhiGxa8LmvhdXiwbXXmfvC4
+tYjFdTJ4GrRBZid07QuCRIV7p4RFf2Yfq3RBVLWxb4LYNFFBo9IfOvj8AgnlG+x9
+Mii96dcC5EGb+ZOoR2tPnP8lcwKBgQDWUH1W7+nQmRQwG7q2nVNvtXMTWaFeh8SE
+I3O+PIQ/6fDajeW5GpGl9RXspL87WoGN5EDWRLkHTzp5+HK7azFkvmi37In8fn6M
+AovnwvnvZJPHWv6hUcLY5zS9yTijS0o3lITcSFddhTHIRrgOTdN06bfLgzJ458uT
+6SMS1Xp5AQKBgGsKpIWfmSQraOy6HBqApB0PFY9jO1flouEZQsDYWu3runKfGkNp
+CiqJ4mASCSyJHhVPORmcYZ9EbiC2a5pTTY2bpyZ9/ccpzu9BvWe8GkiGCpNQI6Qi
+udWlL/qnw3Y/4TC3q943Rqv6mD8KAYXJjWUHm87In0ljM1HnllCkxELvAoGAICsS
+tTLrqJjhk9sFqpVwyaq1rCje9N5yG9dqbxqMSz+lHFkCK0eWpw9jjBKqdZE/MvoY
+1VCZaUR2JYqqRgFv94wxEbJaf+DIw+E5+L6mX018dQbug25PTdlebEJA0xng+Pi8
+/IeLPYlZkJM020jJPZo7MTvvHoDEaN4smo4ahQECgYEAkORdHjWIeZvFua7YAulz
+DRPestcSBxah33WONPdcNda8/qmf117mYsvGIajs4zTEuEyqXLdYENU+UMNBR7CE
+D3Jhgn5/0QHKea2GF1QjpGDLAJne/sRdPFMHkstxyyktOi8Ny80ue2VR0XdWPLoe
+OrKPwlpW2AA2RWf2R9PC8NY=
+-----END PRIVATE KEY-----)";
+
+const char *public_key_pem = R"(-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtodtKCE7f0IHsBGkY/Ih
+ILsWMQgYsLNQV4R9vGMH0Z+4oTQPTTCpQ3FqyVS0JaNKq1bPbXv9GuP0fzLGSzxU
+8i8SqYVnyfggbozJ5/wHTN4BYkkciVCdD6JAFP5IJ4cfcNDeaf0+y94XzNRlrMxJ
+E+IvWLPHH+LiHJuzBSCDZsw8D1FaDiRfiWCRlNti/sp8ZPJgHYlcYJh6QLvL51jn
+Za1+jtQkXPpmFVGgNSkUxLI2pxuCTa/bTOeUnUBhYTOY2b2k7DJcctPDQvThh4So
+NSxG7um1UselHZHGfquajCbaeplO8vHkrkFYw0iq8CuejJiPdX5HrmrWS4NavYCA
+cwIDAQAB
+-----END PUBLIC KEY-----)";
+
+// **********************************************************************************************************************
 
 // Read a file into a buffer
 static char *read_file(const char *filename, size_t *out_len) {
@@ -65,7 +105,7 @@ static char *base64_encode_data(const unsigned char *input, size_t input_len) {
         // Compiling as C
         char *result = malloc(output_len + 1);
     #endif
-    
+
     if (!result) {
         printf("Base64 encode: Memory allocation failed\n");
         return NULL;
@@ -84,7 +124,7 @@ static unsigned char *base64_decode_data(const char *input, size_t *output_len) 
         printf("Base64 decode failed: -0x%04x\n", -ret);
         return NULL;
     }
-    
+
     #ifdef __cplusplus
         // Compiling as C++: cast is required
         unsigned char *result = (unsigned char *)malloc(*output_len);
@@ -171,15 +211,16 @@ static int verify_message(mbedtls_pk_context *pub_key, const char *message) {
     return 1; // Return 1 to indicate hash preparation succeeded
 }
 
-int main(void) {
-    printf("Starting Device RSA Demo\n");
+void setup() {
+  
+    Serial.begin(115200);
+    delay(1000);
 
-    // Initialize contexts
+    const char *json_data = "{\"en\":0,\"fb\":\"F1\",\"fa\":1,\"fl\":1,\"fv\":1,\"temp_home\":22.2,\"temp_refrigerator\":23.3,\"humidity\":24.4,\"fault_power\":\"k\",\"hw\":\"G\"}";
+    
     mbedtls_pk_context pk_priv, pk_pub;
     mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_entropy_context entropy;
-    char *priv_pem = NULL, *pub_pem = NULL;
-    size_t priv_len = 0, pub_len = 0;
     const char *pers = "rsa_device";
     int ret = 1;
     char *signature = NULL;
@@ -190,100 +231,55 @@ int main(void) {
     mbedtls_entropy_init(&entropy);
 
     // Seed RNG
-    printf("Seeding random number generator...\n");
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                 (const unsigned char *)pers, strlen(pers));
     if (ret != 0) {
-        printf("Failed to seed RNG: -0x%04x\n", -ret);
+        Serial.printf("RNG seed failed: -0x%04x\n", -ret);
         goto exit;
     }
-    printf("RNG seeded\n");
 
-    // Load device private key
-    printf("Loading private key (ssl/private_key.pem)...\n");
-    priv_pem = read_file("ssl/private_key.pem", &priv_len);
-    if (!priv_pem) goto exit;
-    ret = mbedtls_pk_parse_key(&pk_priv, (const unsigned char *)priv_pem,
-                               priv_len, NULL, 0, mbedtls_ctr_drbg_random, &ctr_drbg);
+    // Load keys from in-memory PEM
+    ret = mbedtls_pk_parse_key(&pk_priv, (const unsigned char *)private_key_pem,
+                               strlen(private_key_pem) + 1, NULL, 0,
+                               mbedtls_ctr_drbg_random, &ctr_drbg);
     if (ret != 0) {
-        printf("Failed to parse private key: -0x%04x\n", -ret);
+        Serial.printf("Private key parse failed: -0x%04x\n", -ret);
         goto exit;
     }
-    printf("Private key loaded\n");
 
-    // Load device public key (for verification)
-    printf("Loading public key (ssl/public_key.pem)...\n");
-    pub_pem = read_file("ssl/public_key.pem", &pub_len);
-    if (!pub_pem) goto exit;
-    ret = mbedtls_pk_parse_public_key(&pk_pub, (const unsigned char *)pub_pem, pub_len);
+    ret = mbedtls_pk_parse_public_key(&pk_pub, (const unsigned char *)public_key_pem,
+                                      strlen(public_key_pem) + 1);
     if (ret != 0) {
-        printf("Failed to parse public key: -0x%04x\n", -ret);
+        Serial.printf("Public key parse failed: -0x%04x\n", -ret);
         goto exit;
     }
-    printf("Public key loaded\n");
 
-    // Step 1: Prepare JSON
-    printf("\n=== Preparing JSON ===\n");
-    printf("JSON: %s\n", json_data);
-
-    // Step 2: Calculate SHA-256, convert to hex, and sign
-    printf("\n=== Hashing and Signing Hex Hash ===\n");
+    // Sign message
     signature = sign_message(&pk_priv, json_data, &ctr_drbg);
-    if (!signature) goto exit;
-    printf("Base64 RSA Signature: %s\n", signature);
-
-    // Step 3: Verify signature
-    printf("\n=== Verifying Signature ===\n");
-    // Prepare hex hash for verification
-    unsigned char hash[32];
-    ret = mbedtls_sha256((const unsigned char *)json_data, strlen(json_data), hash, 0);
-    if (ret != 0) {
-        printf("Hashing failed: -0x%04x\n", -ret);
-        goto exit;
-    }
-    char hex_hash[65];
-    for (size_t i = 0; i < 32; i++) {
-        sprintf(hex_hash + (i * 2), "%02x", hash[i]);
-    }
-    hex_hash[64] = '\0';
-
-    // Hash the hex string
-    unsigned char hex_hash_digest[32];
-    ret = mbedtls_sha256((const unsigned char *)hex_hash, strlen(hex_hash), hex_hash_digest, 0);
-    if (ret != 0) {
-        printf("Hashing hex string failed: -0x%04x\n", -ret);
+    if (!signature) {
+        Serial.println("Signing failed.");
         goto exit;
     }
 
-    // Verify signature
-    size_t sig_len = 0;
-    unsigned char *sig_bytes = base64_decode_data(signature, &sig_len);
-    if (!sig_bytes) goto exit;
-    ret = mbedtls_pk_verify(&pk_pub, MBEDTLS_MD_SHA256, hex_hash_digest, sizeof(hex_hash_digest),
-                            sig_bytes, sig_len);
-    free(sig_bytes);
-    printf("RSA Signature Verification: %s\n", ret == 0 ? "successful" : "failed");
-    if (ret != 0) {
-        printf("Verification failed: -0x%04x\n", -ret);
-        goto exit;
-    }
+    Serial.print("Signature (base64): ");
+    Serial.println(signature);
 
-    // Step 4: Send to server (simulated)
-    printf("\n=== Sending to Server ===\n");
-    printf("Sending json: %s\n", json_data);
-    printf("Sending signature: %s\n", signature);
-
-    ret = 0; // Success
+    // Free signature memory if dynamically allocated
+    free(signature);
+    ret = 0;
 
 exit:
-    printf("\nCleaning up...\n");
-    free(priv_pem);
-    free(pub_pem);
-    free(signature);
     mbedtls_pk_free(&pk_priv);
     mbedtls_pk_free(&pk_pub);
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);
-    printf("Done\n");
-    return ret;
+
+    if (ret != 0) {
+        Serial.println("Setup failed. Halting.");
+        while (true) {}  // Halt device
+    }
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
 }
