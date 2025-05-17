@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <mbedtls/rsa.h>
 #include <mbedtls/pk.h>
@@ -51,50 +49,13 @@ cwIDAQAB
 
 // **********************************************************************************************************************
 
-// Read a file into a buffer
-static char *read_file(const char *filename, size_t *out_len) {
-    FILE *fp = fopen(filename, "rb");
-    if (!fp) {
-        printf("Failed to open %s\n", filename);
-        return NULL;
-    }
-    fseek(fp, 0, SEEK_END);
-    long len = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    #ifdef __cplusplus
-        // Compiling as C++
-        char *buffer = (char *)malloc(len + 1);
-    #else
-        // Compiling as C
-        char *buffer = malloc(len + 1);
-    #endif
-
-    if (!buffer) {
-        printf("Memory allocation failed\n");
-        fclose(fp);
-        return NULL;
-    }
-    size_t read_len = fread(buffer, 1, len, fp);
-    if (read_len != (size_t)len) {
-        printf("Failed to read %s\n", filename);
-        free(buffer);
-        fclose(fp);
-        return NULL;
-    }
-    buffer[len] = '\0';
-    *out_len = len + 1;
-    fclose(fp);
-    return buffer;
-}
-
 // Base64 encode data
 static char *base64_encode_data(const unsigned char *input, size_t input_len) {
     size_t output_len = 0;
     unsigned char output[512];
     int ret = mbedtls_base64_encode(output, sizeof(output), &output_len, input, input_len);
     if (ret != 0) {
-        printf("Base64 encode failed: -0x%04x\n", -ret);
+        Serial.printf("Base64 encode failed: -0x%04x\n", -ret);
         return NULL;
     }
 
@@ -107,7 +68,7 @@ static char *base64_encode_data(const unsigned char *input, size_t input_len) {
     #endif
 
     if (!result) {
-        printf("Base64 encode: Memory allocation failed\n");
+        Serial.println("Base64 encode: Memory allocation failed");
         return NULL;
     }
     memcpy(result, output, output_len);
@@ -121,7 +82,7 @@ static unsigned char *base64_decode_data(const char *input, size_t *output_len) 
     int ret = mbedtls_base64_decode(output, sizeof(output), output_len,
                                    (const unsigned char *)input, strlen(input));
     if (ret != 0) {
-        printf("Base64 decode failed: -0x%04x\n", -ret);
+        Serial.printf("Base64 decode failed: -0x%04x\n", -ret);
         return NULL;
     }
 
@@ -134,7 +95,7 @@ static unsigned char *base64_decode_data(const char *input, size_t *output_len) 
     #endif
 
     if (!result) {
-        printf("Base64 decode: Memory allocation failed\n");
+        Serial.println("Base64 decode: Memory allocation failed");
         return NULL;
     }
     memcpy(result, output, *output_len);
@@ -148,23 +109,24 @@ static char *sign_message(mbedtls_pk_context *priv_key, const char *message,
     unsigned char hash[32];
     int ret = mbedtls_sha256((const unsigned char *)message, strlen(message), hash, 0);
     if (ret != 0) {
-        printf("Hashing failed: -0x%04x\n", -ret);
+        Serial.printf("Hashing failed: -0x%04x\n", -ret);
         return NULL;
     }
 
     // Convert hash to hex (64 chars)
     char hex_hash[65]; // 64 chars + null terminator
     for (size_t i = 0; i < 32; i++) {
-        sprintf(hex_hash + (i * 2), "%02x", hash[i]);
+        snprintf(hex_hash + (i * 2), 3, "%02x", hash[i]);
     }
     hex_hash[64] = '\0';
-    printf("SHA-256 Hash (hex): %s\n", hex_hash);
+    Serial.print("SHA-256 Hash (hex): ");
+    Serial.println(hex_hash);
 
     // Hash the hex string
     unsigned char hex_hash_digest[32];
     ret = mbedtls_sha256((const unsigned char *)hex_hash, strlen(hex_hash), hex_hash_digest, 0);
     if (ret != 0) {
-        printf("Hashing hex string failed: -0x%04x\n", -ret);
+        Serial.printf("Hashing hex string failed: -0x%04x\n", -ret);
         return NULL;
     }
 
@@ -175,7 +137,7 @@ static char *sign_message(mbedtls_pk_context *priv_key, const char *message,
                           signature, sizeof(signature), &sig_len,
                           mbedtls_ctr_drbg_random, ctr_drbg);
     if (ret != 0) {
-        printf("Signing failed: -0x%04x\n", -ret);
+        Serial.printf("Signing failed: -0x%04x\n", -ret);
         return NULL;
     }
 
@@ -188,14 +150,14 @@ static int verify_message(mbedtls_pk_context *pub_key, const char *message) {
     unsigned char hash[32];
     int ret = mbedtls_sha256((const unsigned char *)message, strlen(message), hash, 0);
     if (ret != 0) {
-        printf("Hashing failed: -0x%04x\n", -ret);
+        Serial.printf("Hashing failed: -0x%04x\n", -ret);
         return 0;
     }
 
     // Convert hash to hex
     char hex_hash[65];
     for (size_t i = 0; i < 32; i++) {
-        sprintf(hex_hash + (i * 2), "%02x", hash[i]);
+        snprintf(hex_hash + (i * 2), 3, "%02x", hash[i]);
     }
     hex_hash[64] = '\0';
 
@@ -203,7 +165,7 @@ static int verify_message(mbedtls_pk_context *pub_key, const char *message) {
     unsigned char hex_hash_digest[32];
     ret = mbedtls_sha256((const unsigned char *)hex_hash, strlen(hex_hash), hex_hash_digest, 0);
     if (ret != 0) {
-        printf("Hashing hex string failed: -0x%04x\n", -ret);
+        Serial.printf("Hashing hex string failed: -0x%04x\n", -ret);
         return 0;
     }
 
